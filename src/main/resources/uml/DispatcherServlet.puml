@@ -1,59 +1,54 @@
 @startuml
 'https://plantuml.com/class-diagram
 
+interface Aware
+
 interface Servlet
 interface ServletConfig
 
-interface GenericServlet
-Servlet <|.. GenericServlet
-ServletConfig <|.. GenericServlet
+class GenericServlet implements Servlet,ServletConfig
 
-interface HttpServlet
-GenericServlet <|-- HttpServlet
+class HttpServlet extends GenericServlet
 
-interface Aware
 
-interface EnvironmentAware {
+interface EnvironmentAware extends Aware {
     Environment getEnvironment()
 }
-Aware <|-- EnvironmentAware
 
-
-interface ApplicationContextAware {
+interface ApplicationContextAware extends Aware{
     void setApplicationContext(ApplicationContext applicationContext)
 }
-Aware <|-- ApplicationContextAware
 
 
 interface EnvironmentCapable {
     void setEnvironment(Environment environment)
 }
 
-
-abstract class HttpServletBean {
+abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware{
     + void init()
     # void initServletBean()
 }
-EnvironmentCapable <|.. HttpServletBean
-HttpServlet <|-- HttpServletBean
-EnvironmentAware <|.. HttpServletBean
 
-
-abstract class FrameworkServlet {
+abstract class FrameworkServlet extends HttpServletBean implements ApplicationContextAware{
     - WebApplicationContext webApplicationContext;
     # void initServletBean()
     # WebApplicationContext initWebApplicationContext()
     # void initFrameworkServlet()
     # void onRefresh(ApplicationContext context)
 }
-ApplicationContextAware <|.. FrameworkServlet
-HttpServletBean <|-- FrameworkServlet
 
-
-class DispatcherServlet {
+class DispatcherServlet extends FrameworkServlet{
 
 }
-FrameworkServlet <|-- DispatcherServlet
+
+
+
+interface ApplicationContext
+
+interface WebApplicationContext extends ApplicationContext{
+    String ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+    ServletContext getServletContext()
+}
 
 
 @enduml
