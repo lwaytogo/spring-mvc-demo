@@ -1,0 +1,59 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface Servlet
+interface ServletConfig
+
+interface GenericServlet
+Servlet <|.. GenericServlet
+ServletConfig <|.. GenericServlet
+
+interface HttpServlet
+GenericServlet <|-- HttpServlet
+
+interface Aware
+
+interface EnvironmentAware {
+    Environment getEnvironment()
+}
+Aware <|-- EnvironmentAware
+
+
+interface ApplicationContextAware {
+    void setApplicationContext(ApplicationContext applicationContext)
+}
+Aware <|-- ApplicationContextAware
+
+
+interface EnvironmentCapable {
+    void setEnvironment(Environment environment)
+}
+
+
+abstract class HttpServletBean {
+    + void init()
+    # void initServletBean()
+}
+EnvironmentCapable <|.. HttpServletBean
+HttpServlet <|-- HttpServletBean
+EnvironmentAware <|.. HttpServletBean
+
+
+abstract class FrameworkServlet {
+    - WebApplicationContext webApplicationContext;
+    # void initServletBean()
+    # WebApplicationContext initWebApplicationContext()
+    # void initFrameworkServlet()
+    # void onRefresh(ApplicationContext context)
+}
+ApplicationContextAware <|.. FrameworkServlet
+HttpServletBean <|-- FrameworkServlet
+
+
+class DispatcherServlet {
+
+}
+FrameworkServlet <|-- DispatcherServlet
+
+
+@enduml
