@@ -12,16 +12,16 @@ class HttpServlet extends GenericServlet
 
 
 interface EnvironmentAware extends Aware {
-    Environment getEnvironment()
+    + Environment getEnvironment()
 }
 
 interface ApplicationContextAware extends Aware{
-    void setApplicationContext(ApplicationContext applicationContext)
+    + void setApplicationContext(ApplicationContext applicationContext)
 }
 
 
 interface EnvironmentCapable {
-    void setEnvironment(Environment environment)
+    + void setEnvironment(Environment environment)
 }
 
 abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware{
@@ -33,7 +33,10 @@ abstract class FrameworkServlet extends HttpServletBean implements ApplicationCo
     - WebApplicationContext webApplicationContext;
     # void initServletBean()
     # WebApplicationContext initWebApplicationContext()
+    # WebApplicationContext createWebApplicationContext(ApplicationContext parent)
+    # void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac)
     # void initFrameworkServlet()
+    + void onApplicationEvent(ContextRefreshedEvent event)
     # void onRefresh(ApplicationContext context)
 }
 
@@ -45,10 +48,39 @@ class DispatcherServlet extends FrameworkServlet{
 
 interface ApplicationContext
 
-interface WebApplicationContext extends ApplicationContext{
-    String ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
-    ServletContext getServletContext()
+class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
+    + void onApplicationEvent(ContextRefreshedEvent event)
 }
+
+interface WebApplicationContext extends ApplicationContext{
+    + String ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+    + ServletContext getServletContext()
+}
+
+
+interface EventListener
+interface Ordered {
+    + int getOrder()
+}
+
+
+interface ApplicationListener<E extends ApplicationEvent> extends EventListener{
+    + void onApplicationEvent(E event)
+}
+
+interface SmartApplicationListener extends ApplicationListener<ApplicationEvent> implements Ordered{
+    + boolean supportsEventType(Class<? extends ApplicationEvent> eventType)
+    + boolean supportsSourceType(Class<?> sourceType)
+}
+
+class SourceFilteringListener implements SmartApplicationListener{
+    - SmartApplicationListener delegate
+    + void onApplicationEvent(ApplicationEvent event)
+    + boolean supportsEventType(Class<? extends ApplicationEvent> eventType)
+    + boolean supportsSourceType(Class<?> sourceType)
+    + int getOrder()
+}
+
 
 
 @enduml
